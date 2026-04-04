@@ -4,7 +4,6 @@
 ![Jupyter](https://img.shields.io/badge/Jupyter-Notebook-orange?style=flat-square&logo=jupyter)
 ![Pandas](https://img.shields.io/badge/Pandas-Data%20Analysis-150458?style=flat-square&logo=pandas)
 ![Seaborn](https://img.shields.io/badge/Seaborn-Visualisation-4C72B0?style=flat-square)
-![License](https://img.shields.io/badge/License-MIT-lightgrey?style=flat-square)
 
 > A comprehensive Exploratory Data Analysis on real-world **credit loan application data** to uncover patterns of loan default risk — helping financial institutions make smarter, data-driven lending decisions while minimising bad debt and avoiding rejection of creditworthy applicants.
 
@@ -165,12 +164,6 @@ jupyter notebook "CREDIT EDA ASSIGNMENT SOLUTION.ipynb"
 **Praasuk Jain**
 - GitHub: [@PJ2001-IND](https://github.com/PJ2001-IND)
 - LinkedIn: [praasuk-jain](https://www.linkedin.com/in/praasuk-jain-425b6b1a3/)
-
----
-
-## 📄 License
-
-This project is licensed under the MIT License.
 
 ---
 
