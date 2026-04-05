@@ -1,103 +1,191 @@
-# 🏦 Credit Risk — Exploratory Data Analysis (EDA)
+# 💳 Credit EDA Case Study — Home Credit Default Risk
 
 ![Python](https://img.shields.io/badge/Python-3.8+-blue?style=flat-square&logo=python)
 ![Jupyter](https://img.shields.io/badge/Jupyter-Notebook-orange?style=flat-square&logo=jupyter)
-![Pandas](https://img.shields.io/badge/Pandas-Data%20Analysis-150458?style=flat-square&logo=pandas)
+![Pandas](https://img.shields.io/badge/Pandas-EDA-150458?style=flat-square&logo=pandas)
 ![Seaborn](https://img.shields.io/badge/Seaborn-Visualisation-4C72B0?style=flat-square)
+![License](https://img.shields.io/badge/License-Academic-lightgrey?style=flat-square)
 
-> A comprehensive Exploratory Data Analysis on real-world **credit loan application data** to uncover patterns of loan default risk — helping financial institutions make smarter, data-driven lending decisions while minimising bad debt and avoiding rejection of creditworthy applicants.
+> A comprehensive **Exploratory Data Analysis (EDA)** case study on Home Credit's loan application dataset — analysing **current and previous credit applications** to identify the patterns and risk indicators that distinguish loan defaulters from repayers. The analysis spans 24 figures across both univariate and bivariate analyses, Spearman correlation heatmaps, and a merged dataset study across two tables.
 
 ---
 
 ## 📌 Problem Statement
 
-Banks and lending institutions face two critical risks when evaluating loan applications:
+Loan providers face a significant challenge when assessing applicants with insufficient or no credit history — they risk either rejecting creditworthy applicants or approving those likely to default. Home Credit uses alternative data (income, employment, region, asset information) to make lending decisions. This case study applies EDA to:
 
-1. **Approving loans for applicants likely to default** — leading to financial loss
-2. **Rejecting applications from creditworthy customers** — leading to missed business
+- **Identify patterns that indicate a client's difficulty in repaying a loan**
+- **Understand the driving variables that distinguish TARGET = 1 (defaulter) from TARGET = 0 (repayer)**
+- **Analyse previous application behaviour to understand how past loan outcomes relate to current default risk**
 
-This project uses EDA to identify the **key drivers of loan default** across applicant demographics, financial history, and previous credit behaviour — providing a data foundation for building a robust credit risk model.
+The goal is to ensure that creditworthy applicants are not rejected and that risky applicants are correctly flagged.
 
 ---
 
-## 🎯 Objective
+## 🎯 Objectives
 
-- Perform deep EDA on both current and previous loan application data
-- Identify patterns that differentiate **defaulters** from **non-defaulters**
-- Handle missing values, outliers, and data imbalance appropriately
-- Extract actionable business insights about high-risk applicant profiles
-- Build a clean, analysis-ready dataset for downstream credit risk modelling
+- Perform structured EDA on `application_data.csv` — the current loan application dataset
+- Clean both datasets: drop high-null columns (>30% missing), fill remaining nulls, remove irrelevant flags
+- Bin continuous variables (`AMT_INCOME_TOTAL`, `AMT_CREDIT`) into meaningful ranges for analysis
+- Split the application data into **TARGET = 0** (repayers) and **TARGET = 1** (defaulters) and analyse separately
+- Compute **Spearman correlation matrices** for both target groups independently
+- Read and clean `previous_application.csv`, then **merge it with the application data** on `SK_ID_CURR`
+- Produce 24 labelled figures covering income, credit, contract type, organisation type, education, and loan purpose
 
 ---
 
 ## 📂 Dataset
 
-| File | Description |
-|---|---|
-| `application_data.csv` | Current loan application data — applicant demographics, income, employment, loan amount, and repayment history |
-| `previous_application.csv` | Historical loan applications by the same clients — previous loan amounts, status, and credit behaviour |
-| `columns_description.csv` | Data dictionary describing all features across both datasets |
+### 1. application_data.csv — Current Loan Applications
 
-### Key Feature Categories in `application_data.csv`:
-- **Demographics**: Age, gender, family status, number of children, education, occupation
-- **Financial**: Income, loan amount, annuity, credit amount, goods price
-- **Employment**: Employment type, years employed, years in current job
-- **Credit Bureau**: Number of previous enquiries, days since last overdue, credit history length
-- **Target Variable**: `TARGET` — 1 = Payment difficulties (defaulter), 0 = All payments on time
+| Property | Detail |
+|---|---|
+| Source | Home Credit Group — loan application records |
+| Records | ~307,511 applications |
+| Features | 122 columns (original) |
+| Target Variable | `TARGET` — 1: payment difficulties (defaulter), 0: repayer |
+| Class Imbalance | TARGET = 0 significantly outnumbers TARGET = 1 (~11.4:1 ratio) |
+
+### Key Features Used in Analysis
+
+| Feature | Description |
+|---|---|
+| `TARGET` | Binary default indicator — 1: defaulter, 0: repayer |
+| `SK_ID_CURR` | Unique application ID — used for merging |
+| `CODE_GENDER` | Applicant gender (F / M / XNA → remapped to F) |
+| `AMT_INCOME_TOTAL` | Total annual income (binned into `AMT_INCOME_RANGE`) |
+| `AMT_CREDIT` | Loan credit amount (binned into `AMT_CREDIT_RANGE`) |
+| `AMT_ANNUITY` | Loan annuity amount (null filled with median) |
+| `NAME_CONTRACT_TYPE` | Cash loans vs Revolving loans |
+| `NAME_INCOME_TYPE` | Working / Commercial associate / Pensioner / State servant / Unemployed |
+| `NAME_EDUCATION_TYPE` | Education level of applicant |
+| `NAME_FAMILY_STATUS` | Marital status |
+| `ORGANIZATION_TYPE` | Employer organisation type (XNA rows dropped) |
+| `DAYS_BIRTH` | Age in days (negative) |
+| `DAYS_EMPLOYED` | Employment duration in days |
+
+### 2. previous_application.csv — Previous Loan Applications
+
+| Property | Detail |
+|---|---|
+| Source | Home Credit Group — historical loan applications |
+| Records | ~1,670,214 previous applications |
+| Features | 37 columns (after dropping >30% null columns) |
+| Key Variable | `NAME_CASH_LOAN_PURPOSE` — purpose of previous loan (XNA and XAP rows dropped) |
+| Merge Key | `SK_ID_CURR` — inner join with application_data |
+
+### 3. columns_description.csv — Data Dictionary
+
+| Property | Detail |
+|---|---|
+| Purpose | Describes all 122 columns in application_data and previous_application |
+| Usage | Reference for feature understanding and analysis planning |
 
 ---
 
-## 🔬 Analysis Pipeline
+## 🔬 Methodology
 
 ```
-application_data.csv + previous_application.csv
-              │
-              ▼
-Data Overview & Quality Check
-              │   ├── Shape, dtypes, null percentages
-              │   ├── Columns with >40% missing values → dropped/imputed
-              │   └── Duplicate check
-              │
-              ▼
-Univariate Analysis
-              │   ├── TARGET distribution (imbalance check)
-              │   ├── Income, loan amount, age distributions
-              │   └── Categorical variable frequency plots
-              │
-              ▼
-Bivariate Analysis
-              │   ├── Default rate by income bracket
-              │   ├── Default rate by employment type
-              │   ├── Default rate by education level
-              │   ├── Loan amount vs income ratio for defaulters
-              │   └── Gender, age group, and family status vs default
-              │
-              ▼
-Previous Application Analysis
-              │   ├── Merge with current applications on client ID
-              │   ├── Previous approval/refusal rates for defaulters
-              │   └── Previous loan purpose vs current default patterns
-              │
-              ▼
-Correlation & Outlier Analysis
-              │   ├── Correlation heatmap of numerical features
-              │   ├── Outlier detection (IQR / box plots)
-              │   └── Key risk indicator identification
-              │
-              ▼
-Business Insights & Risk Profiles
+application_data.csv (307,511 rows, 122 columns)
+   │
+   ▼
+Data Cleaning — application_data
+   │   ├── Drop columns with >30% null values
+   │   ├── Fill AMT_ANNUITY nulls with median
+   │   ├── Drop rows with >30% null values across columns
+   │   ├── Drop unwanted flag columns:
+   │   │     FLAG_MOBIL, FLAG_EMP_PHONE, FLAG_WORK_PHONE, FLAG_CONT_MOBILE,
+   │   │     FLAG_PHONE, FLAG_EMAIL, CNT_FAM_MEMBERS, REGION_RATING_CLIENT,
+   │   │     REGION_RATING_CLIENT_W_CITY, DAYS_LAST_PHONE_CHANGE,
+   │   │     FLAG_DOCUMENT_2 through FLAG_DOCUMENT_21
+   │   ├── Replace CODE_GENDER = 'XNA' with 'F'
+   │   └── Drop rows where ORGANIZATION_TYPE = 'XNA'
+   │
+   ▼
+Feature Engineering — application_data
+   │   ├── Bin AMT_INCOME_TOTAL → AMT_INCOME_RANGE (21 bins: 0–25K to 500K+)
+   │   └── Bin AMT_CREDIT → AMT_CREDIT_RANGE (17 bins: 0–150K to 900K+)
+   │
+   ▼
+Target Split
+   │   ├── target0_df1 → TARGET = 0 (repayers)
+   │   └── target1_df1 → TARGET = 1 (defaulters)
+   │
+   ▼
+Univariate Analysis (Figures 1–8)
+   │   ├── FIG 1:  Income range distribution — TARGET 0 by gender
+   │   ├── FIG 2:  Income type distribution — TARGET 0 by gender
+   │   ├── FIG 3:  Contract type distribution — TARGET 0 by gender
+   │   ├── FIG 4:  Organisation type distribution — TARGET 0
+   │   ├── FIG 5:  Income range distribution — TARGET 1 by gender
+   │   ├── FIG 6:  Income type distribution — TARGET 1 by gender
+   │   ├── FIG 7:  Contract type distribution — TARGET 1 by gender
+   │   └── FIG 8:  Organisation type distribution — TARGET 1
+   │
+   ▼
+Correlation Analysis (Figures 9–10)
+   │   ├── FIG 9:  Spearman correlation heatmap — TARGET 0 (RdYlGn palette)
+   │   └── FIG 10: Spearman correlation heatmap — TARGET 1 (RdYlGn palette)
+   │
+   ▼
+Numerical Bivariate Analysis (Figures 11–16)
+   │   ├── FIG 11: AMT_INCOME_TOTAL distribution — TARGET 0 (boxplot, log scale)
+   │   ├── FIG 12: AMT_CREDIT distribution — TARGET 0 (boxplot, log scale)
+   │   ├── FIG 13: AMT_ANNUITY distribution — TARGET 0 (boxplot, log scale)
+   │   ├── FIG 14: AMT_INCOME_TOTAL distribution — TARGET 1 (boxplot, log scale)
+   │   ├── FIG 15: AMT_CREDIT distribution — TARGET 1 (boxplot, log scale)
+   │   └── FIG 16: AMT_ANNUITY distribution — TARGET 1 (boxplot, log scale)
+   │
+   ▼
+Multivariate Analysis (Figures 17–20)
+   │   ├── FIG 17: Credit amount vs Education type (TARGET 0) hue: Family Status
+   │   ├── FIG 18: Income amount vs Education type (TARGET 0) hue: Family Status
+   │   ├── FIG 19: Credit amount vs Education type (TARGET 1) hue: Family Status
+   │   └── FIG 20: Income amount vs Education type (TARGET 1) hue: Family Status
+   │
+   ▼
+previous_application.csv (1,670,214 rows, 37 cleaned columns)
+   │   ├── Drop columns with >30% null values
+   │   └── Drop rows where NAME_CASH_LOAN_PURPOSE = 'XNA' or 'XAP'
+   │
+   ▼
+Merge: application_data ⨝ previous_application (inner join on SK_ID_CURR)
+   │   ├── Rename conflicting columns with _PREV suffix
+   │   └── Drop remaining flag / timing columns
+   │
+   ▼
+Merged Dataset Analysis (Figures 21–24)
+       ├── FIG 21: Contract status distribution by loan purpose (log scale)
+       ├── FIG 22: Loan purpose distribution by TARGET (log scale)
+       ├── FIG 23: Previous credit amount vs loan purpose — hue: income type
+       └── FIG 24: Previous credit amount vs housing type — hue: TARGET
 ```
+
+---
+
+## 📊 Key Analyses Performed
+
+| Analysis Type | Figures | Focus |
+|---|---|---|
+| Univariate Categorical | FIG 1–8 | Income range, income type, contract type, organisation type — split by TARGET |
+| Correlation (Spearman) | FIG 9–10 | Feature-level correlations within TARGET 0 and TARGET 1 groups separately |
+| Univariate Numerical | FIG 11–16 | Income, credit, and annuity amount distributions — split by TARGET |
+| Multivariate | FIG 17–20 | Credit & income vs education type — stratified by family status and TARGET |
+| Merged Dataset | FIG 21–24 | Loan purpose, contract status, previous credit vs current default behaviour |
+
+> 📝 *Refer to `CREDIT_EDA_ASSIGNMENT_SOLUTION.ipynb` for all 24 figures, full cleaning steps, Spearman correlation tables, and merged dataset analysis.*
 
 ---
 
 ## 💡 Key Insights
 
-- **Imbalanced target**: Only ~8% of applicants are defaulters — raw accuracy would be misleading; any downstream model must account for this imbalance
-- **Income matters, but not alone**: Low-income applicants default more, but high loan-to-income ratios in any bracket are a stronger risk signal
-- **Employment type is highly predictive**: Unemployed applicants and those on maternity leave show significantly higher default rates
-- **Previous application history**: Clients previously refused by the bank are more likely to default if approved in the current cycle
-- **Age effect**: Younger applicants (20–30) show higher default rates; risk decreases steadily with age
-- **Education correlation**: Applicants with lower secondary education default at a higher rate than graduates
+- **Imbalanced dataset** — TARGET = 0 (repayers) outnumber TARGET = 1 (defaulters) by ~11.4:1, requiring careful metric selection for any downstream modelling
+- **Income type matters** — Working professionals dominate both groups, but the proportion of defaulters is higher among those in certain organisation types and income brackets
+- **Cash loans are the dominant contract type** for both repayers and defaulters, though Revolving loans show different risk profiles
+- **Higher credit amounts do not strongly predict default** — the distributions of AMT_CREDIT for TARGET 0 and TARGET 1 are broadly similar, pointing to behavioural rather than purely financial risk factors
+- **Education and family status interact** — higher education levels correlate with larger credit amounts, but this does not uniformly reduce default risk
+- **Previous loan purpose links to current default** — specific loan purposes (repairs, buying a garage, urgent needs) appear more frequently among merged records with TARGET = 1
+- **Housing type** influences previous credit amounts, with house/apartment owners showing different credit patterns relative to rented or parental housing
 
 ---
 
@@ -105,12 +193,11 @@ Business Insights & Risk Profiles
 
 | Tool | Purpose |
 |---|---|
-| Python | Core programming language |
-| Pandas | Data loading, cleaning, and analysis |
-| NumPy | Numerical operations |
-| Matplotlib | Custom visualisations |
-| Seaborn | Statistical plots and heatmaps |
-| Jupyter Notebook | Interactive analysis environment |
+| Python 3.8+ | Core programming language |
+| Pandas | Data loading, cleaning, binning, merging, null handling |
+| NumPy | Numerical operations and array masking for correlation |
+| Matplotlib / Seaborn | 24-figure visualisation suite — countplots, boxplots, heatmaps, barplots, distplots |
+| Jupyter Notebook | Interactive EDA development environment |
 
 ---
 
@@ -132,8 +219,10 @@ git clone https://github.com/PJ2001-IND/Credit-EDA-Assignment.git
 cd Credit-EDA-Assignment
 
 # Launch Jupyter Notebook
-jupyter notebook "CREDIT EDA ASSIGNMENT SOLUTION.ipynb"
+jupyter notebook CREDIT_EDA_ASSIGNMENT_SOLUTION.ipynb
 ```
+
+> ⚠️ **Note:** `application_data.csv` (~158 MB) and `previous_application.csv` (~386 MB) are stored via **Git LFS**. Run `git lfs pull` after cloning to download the full datasets before running the notebook.
 
 ---
 
@@ -141,10 +230,11 @@ jupyter notebook "CREDIT EDA ASSIGNMENT SOLUTION.ipynb"
 
 ```
 📦 Credit-EDA-Assignment
- ┣ 📓 CREDIT EDA ASSIGNMENT SOLUTION.ipynb   # Full EDA notebook
- ┣ 📄 application_data.csv                   # Current loan application dataset
- ┣ 📄 previous_application.csv               # Historical application dataset
- ┣ 📄 columns_description.csv                # Data dictionary for all features
+ ┣ 📓 CREDIT_EDA_ASSIGNMENT_SOLUTION.ipynb   # Full EDA pipeline — 66 cells, 24 figures
+ ┣ 📄 application_data.csv                   # Current loan applications (~307K records, 122 features)
+ ┣ 📄 previous_application.csv               # Previous loan history (~1.67M records)
+ ┣ 📄 columns_description.csv               # Data dictionary for all features
+ ┣ 📄 requirements.txt                       # Python dependencies
  ┗ 📄 README.md                              # Project documentation
 ```
 
@@ -152,10 +242,12 @@ jupyter notebook "CREDIT EDA ASSIGNMENT SOLUTION.ipynb"
 
 ## 🔭 Future Scope
 
-- Build a **credit risk classification model** (Logistic Regression, Random Forest, XGBoost) using the insights from this EDA as feature selection guidance
-- Apply **SMOTE** or class weighting to handle the 92:8 target imbalance
-- Create an interactive **risk dashboard** using Streamlit or Power BI for loan officers
-- Incorporate **bureau data** (external credit scores) as additional features for improved prediction
+- Build a **credit default prediction model** using the cleaned merged dataset — Logistic Regression, Random Forest, or XGBoost with proper handling of the class imbalance (SMOTE / class weights)
+- Apply **SHAP values** to interpret which features drive default risk at the individual applicant level
+- Incorporate **Weight of Evidence (WoE) and Information Value (IV)** analysis for scorecard development
+- Extend EDA to the `installments_payments.csv` and `bureau.csv` datasets from the full Home Credit challenge
+- Deploy a **risk scoring API** using FastAPI that returns a default probability for a new applicant
+- Build an interactive **Power BI / Tableau dashboard** for portfolio-level credit risk monitoring
 
 ---
 
