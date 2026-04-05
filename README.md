@@ -4,7 +4,6 @@
 ![Jupyter](https://img.shields.io/badge/Jupyter-Notebook-orange?style=flat-square&logo=jupyter)
 ![Pandas](https://img.shields.io/badge/Pandas-EDA-150458?style=flat-square&logo=pandas)
 ![Seaborn](https://img.shields.io/badge/Seaborn-Visualisation-4C72B0?style=flat-square)
-![License](https://img.shields.io/badge/License-Academic-lightgrey?style=flat-square)
 
 > A comprehensive **Exploratory Data Analysis (EDA)** case study on Home Credit's loan application dataset — analysing **current and previous credit applications** to identify the patterns and risk indicators that distinguish loan defaulters from repayers. The analysis spans 24 figures across both univariate and bivariate analyses, Spearman correlation heatmaps, and a merged dataset study across two tables.
 
